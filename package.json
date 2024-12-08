@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"@joelek/bedrock": "github:joelek/bedrock#semver:^1.0",
-		"@joelek/ts-stdlib": "github:joelek/ts-stdlib#semver:^1.0"
+		"@joelek/stdlib": "github:joelek/stdlib#semver:^1.0"
 	},
 	"license": "MIT",
 	"main": "./dist/lib-shared/index.js",
