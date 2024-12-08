@@ -103,7 +103,7 @@ export declare class IntersectionGuard<A extends TupleOf<serialization.MessageMa
     ts(eol?: string): string;
 }
 export declare const Intersection: {
-    of<A extends import("@joelek/ts-stdlib/dist/lib/routing").MessageMap<any>[]>(...guards_0: serialization.MessageGuardTuple<A>): IntersectionGuard<A>;
+    of<A extends import("@joelek/stdlib/dist/lib/routing").MessageMap<any>[]>(...guards_0: serialization.MessageGuardTuple<A>): IntersectionGuard<A>;
 };
 export type Null = null;
 export declare class NullGuard extends serialization.MessageGuardBase<Null> {
@@ -140,7 +140,7 @@ export declare class ObjectGuard<A extends serialization.MessageMap<A>, B extend
     ts(eol?: string): string;
 }
 export declare const Object: {
-    of<A extends import("@joelek/ts-stdlib/dist/lib/routing").MessageMap<A>, B extends import("@joelek/ts-stdlib/dist/lib/routing").MessageMap<B> = {}>(required: serialization.MessageGuardMap<A>, optional?: serialization.MessageGuardMap<B>): ObjectGuard<A, B>;
+    of<A extends import("@joelek/stdlib/dist/lib/routing").MessageMap<A>, B extends import("@joelek/stdlib/dist/lib/routing").MessageMap<B> = {}>(required: serialization.MessageGuardMap<A>, optional?: serialization.MessageGuardMap<B>): ObjectGuard<A, B>;
 };
 export type Record<A extends serialization.Message> = globalThis.Record<string, undefined | A>;
 export declare class RecordGuard<A extends serialization.Message> extends serialization.MessageGuardBase<Record<A>> {
@@ -160,7 +160,7 @@ export declare class KeyGuard<A extends serialization.MessageMap<A>> extends ser
     ts(eol?: string): string;
 }
 export declare const Key: {
-    of<A extends import("@joelek/ts-stdlib/dist/lib/routing").MessageMap<A>>(record: A): KeyGuard<A>;
+    of<A extends import("@joelek/stdlib/dist/lib/routing").MessageMap<A>>(record: A): KeyGuard<A>;
 };
 export type Reference<A extends serialization.Message> = A;
 export declare class ReferenceGuard<A extends serialization.Message> extends serialization.MessageGuardBase<Reference<A>> {

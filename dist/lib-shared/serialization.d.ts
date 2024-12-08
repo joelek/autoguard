@@ -1,4 +1,4 @@
-import * as stdlib from "@joelek/ts-stdlib";
+import * as stdlib from "@joelek/stdlib";
 export type Message = stdlib.routing.Message;
 export type MessageMap<A> = stdlib.routing.MessageMap<A>;
 export type MessageGuard<A extends stdlib.routing.Message> = {
