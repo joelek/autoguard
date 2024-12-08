@@ -356,7 +356,7 @@ class KeyGuard extends serialization.MessageGuardBase {
         this.record = record;
     }
     as(subject, path = "") {
-        if ((subject != null) && (subject.constructor === globalThis.String)) {
+        if ((subject != null) && (subject.constructor === globalThis.String || subject.constructor === globalThis.Number)) {
             let string = subject;
             if (string in this.record) {
                 return string;
