@@ -12,10 +12,10 @@
 	},
 	"license": "MIT",
 	"main": "./dist/lib-shared/index.js",
-	"name": "@joelek/ts-autoguard",
+	"name": "@joelek/autoguard",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/joelek/ts-autoguard.git"
+		"url": "https://github.com/joelek/autoguard.git"
 	},
 	"scripts": {
 		"appgen": "node -e \"process.stdout.write(JSON.stringify((({ name, version }) => ({ name, timestamp: Date.now(), version }))(require('./package.json')), null, '\t').split(/\\r?\\n/).join(require('os').EOL) + require('os').EOL)\" > ./source/app.json",

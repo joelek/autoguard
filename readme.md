@@ -1,4 +1,4 @@
-# @joelek/ts-autoguard
+# @joelek/autoguard
 
 Interface descriptor language and code-generation tool for type-safe and robust web applications.
 
@@ -59,7 +59,7 @@ It is not uncommon for the producing application to be maintained by an entirely
 Type guards are intended to prevent from the consequences of broken contracts by embedding runtime assertions into JavaScript code. This guarantees that the consuming application executes with correct type information as the developer intended.
 
 ```ts
-import { guards } from "@joelek/ts-autoguard";
+import { guards } from "@joelek/autoguard";
 
 const guard = guards.Array.of(guards.Number);
 const deserialized = guard.as(JSON.parse(serialized));
@@ -81,7 +81,7 @@ Autoguard is a utility and not a framework. It is unintrusive and modular in its
 Autoguard can be used to manually create type guards for your application. The `guards` module contains type guards for primitive data types as well as building blocks that can be used to construct type guards for complex types.
 
 ```ts
-import { guards } from "@joelek/ts-autoguard";
+import { guards } from "@joelek/autoguard";
 
 const guard = guards.Array.of(
 	guards.Object.of({
@@ -329,7 +329,7 @@ Autoguard provides a module for type-safe serialization and deserialization of m
 
 ```ts
 import { Autoguard } from "./myschema";
-import * as autoguard from "@joelek/ts-autoguard";
+import * as autoguard from "@joelek/autoguard";
 
 let serializer = new autoguard.serialization.MessageSerializer(Autoguard.Guards);
 let serialized = serializer.serialize("MyType", "Hello!");
@@ -360,13 +360,13 @@ Ethereum contributions can be made to address `0xf1B63d95BEfEdAf70B3623B1A4Ba0D9
 Releases follow semantic versioning and release packages are published using the GitHub platform. Use the following command to install the latest release.
 
 ```
-npm install joelek/ts-autoguard#semver:^5.14
+npm install joelek/autoguard#semver:^5.14
 ```
 
 Use the following command to install the very latest build. The very latest build may include breaking changes and should not be used in production environments.
 
 ```
-npm install joelek/ts-autoguard#master
+npm install joelek/autoguard#master
 ```
 
 NB: This project targets TypeScript 4 in strict mode.
