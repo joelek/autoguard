@@ -548,26 +548,28 @@ export function makeDirectoryListing(pathPrefix: string, pathSuffix: string, req
 	if (!libfs.existsSync(fullPath) || !libfs.statSync(fullPath).isDirectory()) {
 		throw 404;
 	}
-	let entries = libfs.readdirSync(fullPath, { withFileTypes: true });
-	let directories = entries
-		.filter((entry) => entry.isDirectory())
-		.map((entry) => {
-			return {
-				name: entry.name
-			};
-		})
-		.sort((one, two) => one.name.localeCompare(two.name));
-	let files = entries
-		.filter((entry) => entry.isFile())
-		.map((entry) => {
-			let stat = libfs.statSync(libpath.join(fullPath, entry.name));
-			return {
-				name: entry.name,
+	let directories: DirectoryListing["directories"] = [];
+	let files: DirectoryListing["files"] = [];
+	let entries = libfs.readdirSync(fullPath);
+	for (let entry of entries) {
+		let stat = libfs.statSync(libpath.join(fullPath, entry));
+		if (stat.isDirectory()) {
+			directories.push({
+				name: entry
+			});
+			continue;
+		}
+		if (stat.isFile()) {
+			files.push({
+				name: entry,
 				size: stat.size,
 				timestamp: stat.mtime.valueOf()
-			};
-		})
-		.sort((one, two) => one.name.localeCompare(two.name));
+			});
+			continue;
+		}
+	}
+	directories.sort((one, two) => one.name.localeCompare(two.name));
+	files.sort((one, two) => one.name.localeCompare(two.name));
 	let components = pathSuffixParts;
 	return {
 		components,
