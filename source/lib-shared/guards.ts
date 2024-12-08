@@ -452,8 +452,8 @@ export class KeyGuard<A extends serialization.MessageMap<A>> extends serializati
 	}
 
 	as(subject: any, path: string = ""): Key<A> {
-		if ((subject != null) && (subject.constructor === globalThis.String)) {
-			let string = subject as string;
+		if ((subject != null) && (subject.constructor === globalThis.String || subject.constructor === globalThis.Number)) {
+			let string = subject as string | number;
 			if (string in this.record) {
 				return string as Key<A>;
 			}
