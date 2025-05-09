@@ -201,6 +201,37 @@ export function combineNodeRawHeaders(raw: Array<string>): Array<string> {
 	return headers;
 };
 
+export function createRawRequest(httpRequest: RequestLike, urlPrefix: string = ""): shared.api.RawRequest {
+	let method = httpRequest.method ?? "GET";
+	let url = httpRequest.url ?? "";
+	if (!url.startsWith(urlPrefix)) {
+		throw `Expected url "${url}" to have prefix "${urlPrefix}"!`;
+	}
+	url = url.slice(urlPrefix.length);
+	let components = shared.api.splitComponents(url);
+	let parameters = shared.api.splitParameters(url);
+	let headers = shared.api.splitHeaders(combineNodeRawHeaders(httpRequest.rawHeaders));
+	let payload = {
+		[Symbol.asyncIterator]: () => httpRequest[Symbol.asyncIterator]()
+	};
+	let raw: shared.api.RawRequest = {
+		method,
+		components,
+		parameters,
+		headers,
+		payload
+	};
+	return raw;
+};
+
+export function createAuxillary(httpRequest: RequestLike): Auxillary {
+	let socket = httpRequest.socket;
+	let auxillary: Auxillary = {
+		socket
+	};
+	return auxillary;
+};
+
 export type NodeRequestHandlerOptions = Partial<Omit<libhttps.RequestOptions, keyof libhttp.RequestOptions>>;
 
 export function makeNodeRequestHandler(options?: NodeRequestHandlerOptions): shared.api.RequestHandler {
@@ -339,31 +370,9 @@ export async function respond(httpResponse: ResponseLike, raw: Partial<shared.ap
 };
 
 export async function route(endpoints: Array<Endpoint>, httpRequest: RequestLike, httpResponse: ResponseLike, serverOptions?: shared.api.ServerOptions): Promise<void> {
-	let urlPrefix = serverOptions?.urlPrefix ?? "";
-	let method = httpRequest.method ?? "GET";
-	let url = httpRequest.url ?? "";
-	if (!url.startsWith(urlPrefix)) {
-		throw `Expected url "${url}" to have prefix "${urlPrefix}"!`;
-	}
-	url = url.slice(urlPrefix.length);
 	try {
-		let components = shared.api.splitComponents(url);
-		let parameters = shared.api.splitParameters(url);
-		let headers = shared.api.splitHeaders(combineNodeRawHeaders(httpRequest.rawHeaders));
-		let payload = {
-			[Symbol.asyncIterator]: () => httpRequest[Symbol.asyncIterator]()
-		};
-		let socket = httpRequest.socket;
-		let raw: shared.api.RawRequest = {
-			method,
-			components,
-			parameters,
-			headers,
-			payload
-		};
-		let auxillary: Auxillary = {
-			socket
-		};
+		let raw = createRawRequest(httpRequest, serverOptions?.urlPrefix);
+		let auxillary = createAuxillary(httpRequest);
 		let allEndpoints = endpoints.map((endpoint) => endpoint(raw, auxillary));
 		let endpointsAcceptingComponents = allEndpoints.filter((endpoint) => endpoint.acceptsComponents());
 		if (endpointsAcceptingComponents.length === 0) {
