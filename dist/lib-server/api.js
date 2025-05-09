@@ -30,7 +30,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makeReadStreamResponse = exports.makeDirectoryListing = exports.getContentTypeFromExtension = exports.parseRangeHeader = exports.route = exports.respond = exports.finalizeResponse = exports.acceptsMethod = exports.acceptsComponents = exports.makeNodeRequestHandler = exports.combineNodeRawHeaders = exports.DynamicRouteMatcher = exports.StaticRouteMatcher = exports.ClientRequest = exports.EndpointError = void 0;
+exports.makeReadStreamResponse = exports.makeDirectoryListing = exports.getContentTypeFromExtension = exports.parseRangeHeader = exports.route = exports.createAuxillary = exports.createRawRequest = exports.respond = exports.finalizeResponse = exports.acceptsMethod = exports.acceptsComponents = exports.makeNodeRequestHandler = exports.combineNodeRawHeaders = exports.DynamicRouteMatcher = exports.StaticRouteMatcher = exports.ClientRequest = exports.EndpointError = void 0;
 const libfs = require("fs");
 const libhttp = require("http");
 const libhttps = require("https");
@@ -325,34 +325,45 @@ function respond(httpResponse, raw, serverOptions) {
 }
 exports.respond = respond;
 ;
+function createRawRequest(httpRequest, urlPrefix = "") {
+    var _a, _b;
+    let method = (_a = httpRequest.method) !== null && _a !== void 0 ? _a : "GET";
+    let url = (_b = httpRequest.url) !== null && _b !== void 0 ? _b : "";
+    if (!url.startsWith(urlPrefix)) {
+        throw `Expected url "${url}" to have prefix "${urlPrefix}"!`;
+    }
+    url = url.slice(urlPrefix.length);
+    let components = shared.api.splitComponents(url);
+    let parameters = shared.api.splitParameters(url);
+    let headers = shared.api.splitHeaders(combineNodeRawHeaders(httpRequest.rawHeaders));
+    let payload = {
+        [Symbol.asyncIterator]: () => httpRequest[Symbol.asyncIterator]()
+    };
+    let raw = {
+        method,
+        components,
+        parameters,
+        headers,
+        payload
+    };
+    return raw;
+}
+exports.createRawRequest = createRawRequest;
+;
+function createAuxillary(httpRequest) {
+    let socket = httpRequest.socket;
+    let auxillary = {
+        socket
+    };
+    return auxillary;
+}
+exports.createAuxillary = createAuxillary;
+;
 function route(endpoints, httpRequest, httpResponse, serverOptions) {
-    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
-        let urlPrefix = (_a = serverOptions === null || serverOptions === void 0 ? void 0 : serverOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
-        let method = (_b = httpRequest.method) !== null && _b !== void 0 ? _b : "GET";
-        let url = (_c = httpRequest.url) !== null && _c !== void 0 ? _c : "";
-        if (!url.startsWith(urlPrefix)) {
-            throw `Expected url "${url}" to have prefix "${urlPrefix}"!`;
-        }
-        url = url.slice(urlPrefix.length);
         try {
-            let components = shared.api.splitComponents(url);
-            let parameters = shared.api.splitParameters(url);
-            let headers = shared.api.splitHeaders(combineNodeRawHeaders(httpRequest.rawHeaders));
-            let payload = {
-                [Symbol.asyncIterator]: () => httpRequest[Symbol.asyncIterator]()
-            };
-            let socket = httpRequest.socket;
-            let raw = {
-                method,
-                components,
-                parameters,
-                headers,
-                payload
-            };
-            let auxillary = {
-                socket
-            };
+            let raw = createRawRequest(httpRequest, serverOptions === null || serverOptions === void 0 ? void 0 : serverOptions.urlPrefix);
+            let auxillary = createAuxillary(httpRequest);
             let allEndpoints = endpoints.map((endpoint) => endpoint(raw, auxillary));
             let endpointsAcceptingComponents = allEndpoints.filter((endpoint) => endpoint.acceptsComponents());
             if (endpointsAcceptingComponents.length === 0) {

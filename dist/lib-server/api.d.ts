@@ -87,6 +87,8 @@ export declare function acceptsComponents(components: Array<string>, matchers: A
 export declare function acceptsMethod(one: string, two: string): boolean;
 export declare function finalizeResponse(raw: shared.api.RawResponse, defaultHeaders: Array<[string, string]>): Promise<shared.api.RawResponse>;
 export declare function respond(httpResponse: ResponseLike, raw: Partial<shared.api.RawResponse>, serverOptions?: shared.api.ServerOptions): Promise<void>;
+export declare function createRawRequest(httpRequest: RequestLike, urlPrefix?: string): shared.api.RawRequest;
+export declare function createAuxillary(httpRequest: RequestLike): Auxillary;
 export declare function route(endpoints: Array<Endpoint>, httpRequest: RequestLike, httpResponse: ResponseLike, serverOptions?: shared.api.ServerOptions): Promise<void>;
 export declare function parseRangeHeader(value: shared.api.JSON, size: number): {
     status: number;
