@@ -93,3 +93,5 @@ export type RequestOptions = {
     onresponseprogess?: (factor: number) => void;
 };
 export type RequestHandler = (raw: RawRequest, clientOptions?: ClientOptions, requestOptions?: RequestOptions) => Promise<RawResponse>;
+export declare function makeRetryRequestHandler(handler: RequestHandler, statuses: Array<number>, maxRetryAttempts: number): RequestHandler;
+export declare function makeRetryAfterRequestHandler(handler: RequestHandler, maxRequestDelaySeconds: number): RequestHandler;

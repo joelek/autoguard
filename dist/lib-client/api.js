@@ -54,18 +54,14 @@ class ServerResponse {
 exports.ServerResponse = ServerResponse;
 ;
 function makeXHRRequestHandler(options) {
-    let retryAfterTimestamp = Date.now();
-    return (raw, clientOptions, requestOptions) => __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now(), (_a = options === null || options === void 0 ? void 0 : options.maxRequestDelaySeconds) !== null && _a !== void 0 ? _a : 16);
+    return (raw, clientOptions, requestOptions) => {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _b;
+            var _a;
             // @ts-ignore
             let xhr = new XMLHttpRequest();
             xhr.onerror = reject;
             xhr.onabort = reject;
             xhr.onload = () => {
-                var _a;
                 let status = xhr.status;
                 // Header values for the same header name are joined by he XHR implementation.
                 let headers = shared.api.splitHeaders(xhr.getAllResponseHeaders().split("\r\n").slice(0, -1));
@@ -75,7 +71,6 @@ function makeXHRRequestHandler(options) {
                     headers,
                     payload
                 };
-                retryAfterTimestamp = (_a = shared.api.parseRetryAfterTimestamp(headers)) !== null && _a !== void 0 ? _a : Date.now();
                 resolve(raw);
             };
             if ((requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onresponseprogess) !== undefined) {
@@ -94,7 +89,7 @@ function makeXHRRequestHandler(options) {
                     }
                 };
             }
-            let url = (_b = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _b !== void 0 ? _b : "";
+            let url = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
             url += shared.api.combineComponents(raw.components);
             url += shared.api.combineParameters(raw.parameters);
             xhr.open(raw.method, url, true);
@@ -105,7 +100,7 @@ function makeXHRRequestHandler(options) {
             }
             xhr.send(yield shared.api.collectPayload(raw.payload));
         }));
-    });
+    };
 }
 exports.makeXHRRequestHandler = makeXHRRequestHandler;
 ;

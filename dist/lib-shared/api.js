@@ -16,7 +16,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.wrapMessageGuard = exports.deserializePayload = exports.deserializeStringPayload = exports.compareArrays = exports.serializePayload = exports.serializeStringPayload = exports.collectPayload = exports.deserializeValue = exports.serializeValue = exports.Headers = exports.Options = exports.JSON = exports.Primitive = exports.Binary = exports.SyncBinary = exports.AsyncBinary = exports.decodeUndeclaredHeaders = exports.decodeHeaderValue = exports.decodeHeaderValues = exports.decodeUndeclaredParameters = exports.decodeParameterValue = exports.decodeParameterValues = exports.encodeUndeclaredParameterPairs = exports.encodeParameterPairs = exports.escapeParameterValue = exports.escapeParameterKey = exports.encodeComponents = exports.escapeComponent = exports.encodeUndeclaredHeaderPairs = exports.encodeHeaderPairs = exports.escapeHeaderValue = exports.escapeHeaderKey = exports.splitHeaders = exports.combineParameters = exports.splitParameters = exports.combineComponents = exports.splitComponents = exports.decodeURIComponent = exports.createRequestDelay = exports.parseRetryAfterTimestamp = void 0;
+exports.makeRetryAfterRequestHandler = exports.makeRetryRequestHandler = exports.wrapMessageGuard = exports.deserializePayload = exports.deserializeStringPayload = exports.compareArrays = exports.serializePayload = exports.serializeStringPayload = exports.collectPayload = exports.deserializeValue = exports.serializeValue = exports.Headers = exports.Options = exports.JSON = exports.Primitive = exports.Binary = exports.SyncBinary = exports.AsyncBinary = exports.decodeUndeclaredHeaders = exports.decodeHeaderValue = exports.decodeHeaderValues = exports.decodeUndeclaredParameters = exports.decodeParameterValue = exports.decodeParameterValues = exports.encodeUndeclaredParameterPairs = exports.encodeParameterPairs = exports.escapeParameterValue = exports.escapeParameterKey = exports.encodeComponents = exports.escapeComponent = exports.encodeUndeclaredHeaderPairs = exports.encodeHeaderPairs = exports.escapeHeaderValue = exports.escapeHeaderKey = exports.splitHeaders = exports.combineParameters = exports.splitParameters = exports.combineComponents = exports.splitComponents = exports.decodeURIComponent = exports.createRequestDelay = exports.parseRetryAfterTimestamp = void 0;
 const guards = require("./guards");
 function parseRetryAfterTimestamp(headers) {
     let header = headers.slice().reverse().find((header) => header[0].toLowerCase() === "retry-after");
@@ -545,4 +545,34 @@ function wrapMessageGuard(guard, log) {
         } });
 }
 exports.wrapMessageGuard = wrapMessageGuard;
+;
+function makeRetryRequestHandler(handler, statuses, maxRetryAttempts) {
+    return (...args) => __awaiter(this, void 0, void 0, function* () {
+        let response = yield handler(...args);
+        for (let retryAttempt = 0; retryAttempt < maxRetryAttempts; retryAttempt += 1) {
+            if (statuses.includes(response.status)) {
+                let avgMs = (Math.pow(2, retryAttempt)) * 1000;
+                let minMs = avgMs * 0.75;
+                let maxMs = avgMs * 1.25;
+                let ms = minMs + Math.random() * (maxMs - minMs);
+                yield createRequestDelay(ms, Infinity);
+                response = yield handler(...args);
+            }
+        }
+        return response;
+    });
+}
+exports.makeRetryRequestHandler = makeRetryRequestHandler;
+;
+function makeRetryAfterRequestHandler(handler, maxRequestDelaySeconds) {
+    let retryAfterTimestamp = Date.now();
+    return (...args) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        yield createRequestDelay(retryAfterTimestamp - Date.now(), maxRequestDelaySeconds);
+        let response = yield handler(...args);
+        retryAfterTimestamp = (_a = parseRetryAfterTimestamp(response.headers)) !== null && _a !== void 0 ? _a : Date.now();
+        return response;
+    });
+}
+exports.makeRetryAfterRequestHandler = makeRetryAfterRequestHandler;
 ;

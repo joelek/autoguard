@@ -201,11 +201,9 @@ function createAuxillary(httpRequest) {
 exports.createAuxillary = createAuxillary;
 ;
 function makeNodeRequestHandler(options) {
-    let retryAfterTimestamp = Date.now();
-    return (raw, clientOptions, requestOptions) => __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
-        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now(), (_a = options === null || options === void 0 ? void 0 : options.maxRequestDelaySeconds) !== null && _a !== void 0 ? _a : Infinity);
-        let urlPrefix = (_b = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _b !== void 0 ? _b : "";
+    return (raw, clientOptions, requestOptions) => {
+        var _a;
+        let urlPrefix = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
         let lib = urlPrefix.startsWith("https:") ? libhttps : libhttp;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let payload = yield shared.api.collectPayload(raw.payload);
@@ -230,7 +228,7 @@ function makeNodeRequestHandler(options) {
             url += shared.api.combineComponents(raw.components);
             url += shared.api.combineParameters(raw.parameters);
             let request = lib.request(url, Object.assign(Object.assign({}, options), { method: raw.method, headers: headers }), (response) => {
-                var _a, _b;
+                var _a;
                 let status = (_a = response.statusCode) !== null && _a !== void 0 ? _a : 200;
                 let headers = shared.api.splitHeaders(combineNodeRawHeaders(response.rawHeaders));
                 let payload = {
@@ -241,7 +239,6 @@ function makeNodeRequestHandler(options) {
                     headers,
                     payload
                 };
-                retryAfterTimestamp = (_b = shared.api.parseRetryAfterTimestamp(headers)) !== null && _b !== void 0 ? _b : Date.now();
                 resolve(raw);
             });
             request.on("abort", reject);
@@ -249,7 +246,7 @@ function makeNodeRequestHandler(options) {
             request.write(payload);
             request.end();
         }));
-    });
+    };
 }
 exports.makeNodeRequestHandler = makeNodeRequestHandler;
 ;
