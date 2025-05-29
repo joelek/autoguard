@@ -1,6 +1,30 @@
 import * as guards from "./guards";
 import * as serialization from "./serialization";
 
+export function parseRetryAfterTimestamp(headers: Array<[string, string]>): number | undefined {
+	let header = headers.slice().reverse().find((header) => header[0].toLowerCase() === "retry-after");
+	if (header != null) {
+		let value = header[1];
+		let seconds = Number.parseInt(value);
+		if (!Number.isNaN(seconds)) {
+			return Date.now() + (seconds * 1000);
+		} else {
+			let timestamp = new Date(value).getTime();
+			if (!Number.isNaN(timestamp)) {
+				return timestamp;
+			}
+		}
+	}
+};
+
+const MAX_REQUEST_DELAY_SECONDS = 16;
+
+export function createRequestDelay(ms: number): Promise<void> {
+	return new Promise((resolve, reject) => {
+		setTimeout(resolve, Math.max(0, Math.min(ms, MAX_REQUEST_DELAY_SECONDS * 1000)));
+	});
+};
+
 export function decodeURIComponent(string: string): string | undefined {
 	try {
 		return globalThis.decodeURIComponent(string);

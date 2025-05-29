@@ -45,50 +45,59 @@ type XHRProgressEvent = {
 	total: number;
 };
 
-export function xhr(raw: shared.api.RawRequest, clientOptions?: shared.api.ClientOptions, requestOptions?: shared.api.RequestOptions): Promise<shared.api.RawResponse> {
-	return new Promise(async (resolve, reject) => {
-		// @ts-ignore
-		let xhr = new XMLHttpRequest();
-		xhr.onerror = reject;
-		xhr.onabort = reject;
-		xhr.onload = () => {
-			let status = xhr.status;
-			// Header values for the same header name are joined by he XHR implementation.
-			let headers = shared.api.splitHeaders(xhr.getAllResponseHeaders().split("\r\n").slice(0, -1));
-			let payload = [new Uint8Array(xhr.response as ArrayBuffer)];
-			let raw: shared.api.RawResponse = {
-				status,
-				headers,
-				payload
+export type XHRRequestHandlerOptions = {};
+
+export function makeXHRRequestHandler(options?: XHRRequestHandlerOptions): shared.api.RequestHandler {
+	let retryAfterTimestamp = Date.now();
+	return async (raw, clientOptions, requestOptions) => {
+		await shared.api.createRequestDelay(retryAfterTimestamp - Date.now());
+		return new Promise(async (resolve, reject) => {
+			// @ts-ignore
+			let xhr = new XMLHttpRequest();
+			xhr.onerror = reject;
+			xhr.onabort = reject;
+			xhr.onload = () => {
+				let status = xhr.status;
+				// Header values for the same header name are joined by he XHR implementation.
+				let headers = shared.api.splitHeaders(xhr.getAllResponseHeaders().split("\r\n").slice(0, -1));
+				let payload = [new Uint8Array(xhr.response as ArrayBuffer)];
+				let raw: shared.api.RawResponse = {
+					status,
+					headers,
+					payload
+				};
+				retryAfterTimestamp = shared.api.parseRetryAfterTimestamp(headers) ?? Date.now();
+				resolve(raw);
 			};
-			resolve(raw);
-		};
-		if (requestOptions?.onresponseprogess !== undefined) {
-			xhr.onprogress = (event: XHRProgressEvent) => {
-				if (event.lengthComputable) {
-					requestOptions?.onresponseprogess?.(event.loaded / event.total);
-				}
-			};
-		}
-		if (requestOptions?.onrequestprogress !== undefined) {
-			xhr.upload.onprogress = (event: XHRProgressEvent) => {
-				if (event.lengthComputable) {
-					requestOptions?.onrequestprogress?.(event.loaded / event.total);
-				}
-			};
-		}
-		let url = clientOptions?.urlPrefix ?? "";
-		url += shared.api.combineComponents(raw.components);
-		url += shared.api.combineParameters(raw.parameters);
-		xhr.open(raw.method, url, true);
-		xhr.responseType = "arraybuffer";
-		for (let header of raw.headers) {
-			// Header values for the same header name are joined by he XHR implementation.
-			xhr.setRequestHeader(header[0], header[1]);
-		}
-		xhr.send(await shared.api.collectPayload(raw.payload));
-	});
+			if (requestOptions?.onresponseprogess !== undefined) {
+				xhr.onprogress = (event: XHRProgressEvent) => {
+					if (event.lengthComputable) {
+						requestOptions?.onresponseprogess?.(event.loaded / event.total);
+					}
+				};
+			}
+			if (requestOptions?.onrequestprogress !== undefined) {
+				xhr.upload.onprogress = (event: XHRProgressEvent) => {
+					if (event.lengthComputable) {
+						requestOptions?.onrequestprogress?.(event.loaded / event.total);
+					}
+				};
+			}
+			let url = clientOptions?.urlPrefix ?? "";
+			url += shared.api.combineComponents(raw.components);
+			url += shared.api.combineParameters(raw.parameters);
+			xhr.open(raw.method, url, true);
+			xhr.responseType = "arraybuffer";
+			for (let header of raw.headers) {
+				// Header values for the same header name are joined by he XHR implementation.
+				xhr.setRequestHeader(header[0], header[1]);
+			}
+			xhr.send(await shared.api.collectPayload(raw.payload));
+		});
+	};
 };
+
+export const xhr = makeXHRRequestHandler();
 
 export function finalizeRequest(raw: shared.api.RawRequest, defaultHeaders: Array<[string, string]>): shared.api.RawRequest {
 	let headersToAppend = defaultHeaders.filter((defaultHeader) => {

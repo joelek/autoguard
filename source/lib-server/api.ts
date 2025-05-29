@@ -235,7 +235,9 @@ export function createAuxillary(httpRequest: RequestLike): Auxillary {
 export type NodeRequestHandlerOptions = Partial<Omit<libhttps.RequestOptions, keyof libhttp.RequestOptions>>;
 
 export function makeNodeRequestHandler(options?: NodeRequestHandlerOptions): shared.api.RequestHandler {
-	return (raw, clientOptions, requestOptions) => {
+	let retryAfterTimestamp = Date.now();
+	return async (raw, clientOptions, requestOptions) => {
+		await shared.api.createRequestDelay(retryAfterTimestamp - Date.now());
 		let urlPrefix = clientOptions?.urlPrefix ?? "";
 		let lib = urlPrefix.startsWith("https:") ? libhttps : libhttp;
 		return new Promise(async (resolve, reject) => {
@@ -273,6 +275,7 @@ export function makeNodeRequestHandler(options?: NodeRequestHandlerOptions): sha
 					headers,
 					payload
 				};
+				retryAfterTimestamp = shared.api.parseRetryAfterTimestamp(headers) ?? Date.now();
 				resolve(raw);
 			});
 			request.on("abort", reject);
