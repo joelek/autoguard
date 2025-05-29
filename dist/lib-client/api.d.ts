@@ -12,7 +12,9 @@ export declare class ServerResponse<A extends shared.api.EndpointResponse> {
 export type Client<A extends shared.api.RequestMap<A>, B extends shared.api.ResponseMap<B>> = {
     [C in keyof A & keyof B]: (request: A[C], requestOptions?: shared.api.RequestOptions) => Promise<ServerResponse<B[C]>>;
 };
-export type XHRRequestHandlerOptions = {};
+export type XHRRequestHandlerOptions = {
+    maxRequestDelaySeconds?: number;
+};
 export declare function makeXHRRequestHandler(options?: XHRRequestHandlerOptions): shared.api.RequestHandler;
 export declare const xhr: shared.api.RequestHandler;
 export declare function finalizeRequest(raw: shared.api.RawRequest, defaultHeaders: Array<[string, string]>): shared.api.RawRequest;

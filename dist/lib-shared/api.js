@@ -36,10 +36,9 @@ function parseRetryAfterTimestamp(headers) {
 }
 exports.parseRetryAfterTimestamp = parseRetryAfterTimestamp;
 ;
-const MAX_REQUEST_DELAY_SECONDS = 16;
-function createRequestDelay(ms) {
+function createRequestDelay(ms, maxRequestDelaySeconds) {
     return new Promise((resolve, reject) => {
-        setTimeout(resolve, Math.max(0, Math.min(ms, MAX_REQUEST_DELAY_SECONDS * 1000)));
+        setTimeout(resolve, Math.max(0, Math.min(ms, maxRequestDelaySeconds * 1000)));
     });
 }
 exports.createRequestDelay = createRequestDelay;

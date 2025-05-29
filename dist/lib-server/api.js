@@ -203,9 +203,9 @@ exports.createAuxillary = createAuxillary;
 function makeNodeRequestHandler(options) {
     let retryAfterTimestamp = Date.now();
     return (raw, clientOptions, requestOptions) => __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now());
-        let urlPrefix = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
+        var _a, _b;
+        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now(), (_a = options === null || options === void 0 ? void 0 : options.maxRequestDelaySeconds) !== null && _a !== void 0 ? _a : Infinity);
+        let urlPrefix = (_b = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _b !== void 0 ? _b : "";
         let lib = urlPrefix.startsWith("https:") ? libhttps : libhttp;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let payload = yield shared.api.collectPayload(raw.payload);

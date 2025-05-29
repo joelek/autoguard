@@ -83,7 +83,9 @@ export declare class DynamicRouteMatcher<A> implements RouteMatcher {
 export declare function combineNodeRawHeaders(raw: Array<string>): Array<string>;
 export declare function createRawRequest(httpRequest: RequestLike, urlPrefix?: string): shared.api.RawRequest;
 export declare function createAuxillary(httpRequest: RequestLike): Auxillary;
-export type NodeRequestHandlerOptions = Partial<Omit<libhttps.RequestOptions, keyof libhttp.RequestOptions>>;
+export type NodeRequestHandlerOptions = Partial<Omit<libhttps.RequestOptions, keyof libhttp.RequestOptions>> & {
+    maxRequestDelaySeconds?: number;
+};
 export declare function makeNodeRequestHandler(options?: NodeRequestHandlerOptions): shared.api.RequestHandler;
 export declare function acceptsComponents(components: Array<string>, matchers: Array<RouteMatcher>): boolean;
 export declare function acceptsMethod(one: string, two: string): boolean;

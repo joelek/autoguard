@@ -56,9 +56,10 @@ exports.ServerResponse = ServerResponse;
 function makeXHRRequestHandler(options) {
     let retryAfterTimestamp = Date.now();
     return (raw, clientOptions, requestOptions) => __awaiter(this, void 0, void 0, function* () {
-        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now());
+        var _a;
+        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now(), (_a = options === null || options === void 0 ? void 0 : options.maxRequestDelaySeconds) !== null && _a !== void 0 ? _a : 16);
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _b;
             // @ts-ignore
             let xhr = new XMLHttpRequest();
             xhr.onerror = reject;
@@ -93,7 +94,7 @@ function makeXHRRequestHandler(options) {
                     }
                 };
             }
-            let url = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
+            let url = (_b = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _b !== void 0 ? _b : "";
             url += shared.api.combineComponents(raw.components);
             url += shared.api.combineParameters(raw.parameters);
             xhr.open(raw.method, url, true);
