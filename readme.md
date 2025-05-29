@@ -405,6 +405,8 @@ NB: This project targets TypeScript 4 in strict mode.
 * Consider allowing recursive array types (generate `A[]` instead of `autoguard.guards.Array<A>`).
 * Add support for optional tuple members.
 * Add support for negative integer and number literals.
+* Fix issue with `serverOptions` being unused in `respond()`.
+* Fix issue with default headers not being applied for unsuccessful server responses.
 
 ## Syntax
 
