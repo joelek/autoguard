@@ -17,11 +17,9 @@ export function parseRetryAfterTimestamp(headers: Array<[string, string]>): numb
 	}
 };
 
-const MAX_REQUEST_DELAY_SECONDS = 16;
-
-export function createRequestDelay(ms: number): Promise<void> {
+export function createRequestDelay(ms: number, maxRequestDelaySeconds: number): Promise<void> {
 	return new Promise((resolve, reject) => {
-		setTimeout(resolve, Math.max(0, Math.min(ms, MAX_REQUEST_DELAY_SECONDS * 1000)));
+		setTimeout(resolve, Math.max(0, Math.min(ms, maxRequestDelaySeconds * 1000)));
 	});
 };
 
