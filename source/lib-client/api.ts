@@ -45,14 +45,10 @@ type XHRProgressEvent = {
 	total: number;
 };
 
-export type XHRRequestHandlerOptions = {
-	maxRequestDelaySeconds?: number;
-};
+export type XHRRequestHandlerOptions = {};
 
 export function makeXHRRequestHandler(options?: XHRRequestHandlerOptions): shared.api.RequestHandler {
-	let retryAfterTimestamp = Date.now();
-	return async (raw, clientOptions, requestOptions) => {
-		await shared.api.createRequestDelay(retryAfterTimestamp - Date.now(), options?.maxRequestDelaySeconds ?? 16);
+	return (raw, clientOptions, requestOptions) => {
 		return new Promise(async (resolve, reject) => {
 			// @ts-ignore
 			let xhr = new XMLHttpRequest();
@@ -68,7 +64,6 @@ export function makeXHRRequestHandler(options?: XHRRequestHandlerOptions): share
 					headers,
 					payload
 				};
-				retryAfterTimestamp = shared.api.parseRetryAfterTimestamp(headers) ?? Date.now();
 				resolve(raw);
 			};
 			if (requestOptions?.onresponseprogess !== undefined) {
