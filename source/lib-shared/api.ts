@@ -565,3 +565,13 @@ export function makeRetryRequestHandler(handler: RequestHandler, statuses: Array
 		return response;
 	};
 };
+
+export function makeRetryAfterRequestHandler(handler: RequestHandler, maxRequestDelaySeconds: number): RequestHandler {
+	let retryAfterTimestamp = Date.now();
+	return async (...args) => {
+		await createRequestDelay(retryAfterTimestamp - Date.now(), maxRequestDelaySeconds);
+		let response = await handler(...args);
+		retryAfterTimestamp = parseRetryAfterTimestamp(response.headers) ?? Date.now();
+		return response;
+	};
+};
