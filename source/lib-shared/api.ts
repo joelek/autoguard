@@ -548,3 +548,20 @@ export type RequestOptions = {
 };
 
 export type RequestHandler = (raw: RawRequest, clientOptions?: ClientOptions, requestOptions?: RequestOptions) => Promise<RawResponse>;
+
+export function makeRetryRequestHandler(handler: RequestHandler, statuses: Array<number>, maxRetryAttempts: number): RequestHandler {
+	return async (...args) => {
+		let response = await handler(...args);
+		for (let retryAttempt = 0; retryAttempt < maxRetryAttempts; retryAttempt += 1) {
+			if (statuses.includes(response.status)) {
+				let avgMs = (2 ** retryAttempt) * 1000;
+				let minMs = avgMs * 0.75;
+				let maxMs = avgMs * 1.25;
+				let ms = minMs + Math.random() * (maxMs - minMs);
+				await createRequestDelay(ms, Infinity);
+				response = await handler(...args);
+			}
+		}
+		return response;
+	};
+};
