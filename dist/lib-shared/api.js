@@ -16,8 +16,34 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.wrapMessageGuard = exports.deserializePayload = exports.deserializeStringPayload = exports.compareArrays = exports.serializePayload = exports.serializeStringPayload = exports.collectPayload = exports.deserializeValue = exports.serializeValue = exports.Headers = exports.Options = exports.JSON = exports.Primitive = exports.Binary = exports.SyncBinary = exports.AsyncBinary = exports.decodeUndeclaredHeaders = exports.decodeHeaderValue = exports.decodeHeaderValues = exports.decodeUndeclaredParameters = exports.decodeParameterValue = exports.decodeParameterValues = exports.encodeUndeclaredParameterPairs = exports.encodeParameterPairs = exports.escapeParameterValue = exports.escapeParameterKey = exports.encodeComponents = exports.escapeComponent = exports.encodeUndeclaredHeaderPairs = exports.encodeHeaderPairs = exports.escapeHeaderValue = exports.escapeHeaderKey = exports.splitHeaders = exports.combineParameters = exports.splitParameters = exports.combineComponents = exports.splitComponents = exports.decodeURIComponent = void 0;
+exports.wrapMessageGuard = exports.deserializePayload = exports.deserializeStringPayload = exports.compareArrays = exports.serializePayload = exports.serializeStringPayload = exports.collectPayload = exports.deserializeValue = exports.serializeValue = exports.Headers = exports.Options = exports.JSON = exports.Primitive = exports.Binary = exports.SyncBinary = exports.AsyncBinary = exports.decodeUndeclaredHeaders = exports.decodeHeaderValue = exports.decodeHeaderValues = exports.decodeUndeclaredParameters = exports.decodeParameterValue = exports.decodeParameterValues = exports.encodeUndeclaredParameterPairs = exports.encodeParameterPairs = exports.escapeParameterValue = exports.escapeParameterKey = exports.encodeComponents = exports.escapeComponent = exports.encodeUndeclaredHeaderPairs = exports.encodeHeaderPairs = exports.escapeHeaderValue = exports.escapeHeaderKey = exports.splitHeaders = exports.combineParameters = exports.splitParameters = exports.combineComponents = exports.splitComponents = exports.decodeURIComponent = exports.createRequestDelay = exports.parseRetryAfterTimestamp = void 0;
 const guards = require("./guards");
+function parseRetryAfterTimestamp(headers) {
+    let header = headers.slice().reverse().find((header) => header[0].toLowerCase() === "retry-after");
+    if (header != null) {
+        let value = header[1];
+        let seconds = Number.parseInt(value);
+        if (!Number.isNaN(seconds)) {
+            return Date.now() + (seconds * 1000);
+        }
+        else {
+            let timestamp = new Date(value).getTime();
+            if (!Number.isNaN(timestamp)) {
+                return timestamp;
+            }
+        }
+    }
+}
+exports.parseRetryAfterTimestamp = parseRetryAfterTimestamp;
+;
+const MAX_REQUEST_DELAY_SECONDS = 16;
+function createRequestDelay(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, Math.max(0, Math.min(ms, MAX_REQUEST_DELAY_SECONDS * 1000)));
+    });
+}
+exports.createRequestDelay = createRequestDelay;
+;
 function decodeURIComponent(string) {
     try {
         return globalThis.decodeURIComponent(string);

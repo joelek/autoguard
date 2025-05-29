@@ -1,5 +1,7 @@
 import * as guards from "./guards";
 import * as serialization from "./serialization";
+export declare function parseRetryAfterTimestamp(headers: Array<[string, string]>): number | undefined;
+export declare function createRequestDelay(ms: number): Promise<void>;
 export declare function decodeURIComponent(string: string): string | undefined;
 export declare function splitComponents(url: string): Array<string>;
 export declare function combineComponents(components: Array<string>): string;

@@ -30,7 +30,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makeReadStreamResponse = exports.makeDirectoryListing = exports.getContentTypeFromExtension = exports.parseRangeHeader = exports.route = exports.createAuxillary = exports.createRawRequest = exports.respond = exports.finalizeResponse = exports.acceptsMethod = exports.acceptsComponents = exports.makeNodeRequestHandler = exports.combineNodeRawHeaders = exports.DynamicRouteMatcher = exports.StaticRouteMatcher = exports.ClientRequest = exports.EndpointError = void 0;
+exports.makeReadStreamResponse = exports.makeDirectoryListing = exports.getContentTypeFromExtension = exports.parseRangeHeader = exports.route = exports.respond = exports.finalizeResponse = exports.acceptsMethod = exports.acceptsComponents = exports.makeNodeRequestHandler = exports.createAuxillary = exports.createRawRequest = exports.combineNodeRawHeaders = exports.DynamicRouteMatcher = exports.StaticRouteMatcher = exports.ClientRequest = exports.EndpointError = void 0;
 const libfs = require("fs");
 const libhttp = require("http");
 const libhttps = require("https");
@@ -166,9 +166,45 @@ function combineNodeRawHeaders(raw) {
 }
 exports.combineNodeRawHeaders = combineNodeRawHeaders;
 ;
+function createRawRequest(httpRequest, urlPrefix = "") {
+    var _a, _b;
+    let method = (_a = httpRequest.method) !== null && _a !== void 0 ? _a : "GET";
+    let url = (_b = httpRequest.url) !== null && _b !== void 0 ? _b : "";
+    if (!url.startsWith(urlPrefix)) {
+        throw `Expected url "${url}" to have prefix "${urlPrefix}"!`;
+    }
+    url = url.slice(urlPrefix.length);
+    let components = shared.api.splitComponents(url);
+    let parameters = shared.api.splitParameters(url);
+    let headers = shared.api.splitHeaders(combineNodeRawHeaders(httpRequest.rawHeaders));
+    let payload = {
+        [Symbol.asyncIterator]: () => httpRequest[Symbol.asyncIterator]()
+    };
+    let raw = {
+        method,
+        components,
+        parameters,
+        headers,
+        payload
+    };
+    return raw;
+}
+exports.createRawRequest = createRawRequest;
+;
+function createAuxillary(httpRequest) {
+    let socket = httpRequest.socket;
+    let auxillary = {
+        socket
+    };
+    return auxillary;
+}
+exports.createAuxillary = createAuxillary;
+;
 function makeNodeRequestHandler(options) {
-    return (raw, clientOptions, requestOptions) => {
+    let retryAfterTimestamp = Date.now();
+    return (raw, clientOptions, requestOptions) => __awaiter(this, void 0, void 0, function* () {
         var _a;
+        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now());
         let urlPrefix = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
         let lib = urlPrefix.startsWith("https:") ? libhttps : libhttp;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -194,7 +230,7 @@ function makeNodeRequestHandler(options) {
             url += shared.api.combineComponents(raw.components);
             url += shared.api.combineParameters(raw.parameters);
             let request = lib.request(url, Object.assign(Object.assign({}, options), { method: raw.method, headers: headers }), (response) => {
-                var _a;
+                var _a, _b;
                 let status = (_a = response.statusCode) !== null && _a !== void 0 ? _a : 200;
                 let headers = shared.api.splitHeaders(combineNodeRawHeaders(response.rawHeaders));
                 let payload = {
@@ -205,6 +241,7 @@ function makeNodeRequestHandler(options) {
                     headers,
                     payload
                 };
+                retryAfterTimestamp = (_b = shared.api.parseRetryAfterTimestamp(headers)) !== null && _b !== void 0 ? _b : Date.now();
                 resolve(raw);
             });
             request.on("abort", reject);
@@ -212,7 +249,7 @@ function makeNodeRequestHandler(options) {
             request.write(payload);
             request.end();
         }));
-    };
+    });
 }
 exports.makeNodeRequestHandler = makeNodeRequestHandler;
 ;
@@ -324,40 +361,6 @@ function respond(httpResponse, raw, serverOptions) {
     });
 }
 exports.respond = respond;
-;
-function createRawRequest(httpRequest, urlPrefix = "") {
-    var _a, _b;
-    let method = (_a = httpRequest.method) !== null && _a !== void 0 ? _a : "GET";
-    let url = (_b = httpRequest.url) !== null && _b !== void 0 ? _b : "";
-    if (!url.startsWith(urlPrefix)) {
-        throw `Expected url "${url}" to have prefix "${urlPrefix}"!`;
-    }
-    url = url.slice(urlPrefix.length);
-    let components = shared.api.splitComponents(url);
-    let parameters = shared.api.splitParameters(url);
-    let headers = shared.api.splitHeaders(combineNodeRawHeaders(httpRequest.rawHeaders));
-    let payload = {
-        [Symbol.asyncIterator]: () => httpRequest[Symbol.asyncIterator]()
-    };
-    let raw = {
-        method,
-        components,
-        parameters,
-        headers,
-        payload
-    };
-    return raw;
-}
-exports.createRawRequest = createRawRequest;
-;
-function createAuxillary(httpRequest) {
-    let socket = httpRequest.socket;
-    let auxillary = {
-        socket
-    };
-    return auxillary;
-}
-exports.createAuxillary = createAuxillary;
 ;
 function route(endpoints, httpRequest, httpResponse, serverOptions) {
     return __awaiter(this, void 0, void 0, function* () {

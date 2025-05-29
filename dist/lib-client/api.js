@@ -23,7 +23,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.finalizeRequest = exports.xhr = exports.ServerResponse = void 0;
+exports.finalizeRequest = exports.xhr = exports.makeXHRRequestHandler = exports.ServerResponse = void 0;
 const shared = require("../lib-shared");
 __exportStar(require("../lib-shared/api"), exports);
 class ServerResponse {
@@ -53,55 +53,62 @@ class ServerResponse {
 }
 exports.ServerResponse = ServerResponse;
 ;
-function xhr(raw, clientOptions, requestOptions) {
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        // @ts-ignore
-        let xhr = new XMLHttpRequest();
-        xhr.onerror = reject;
-        xhr.onabort = reject;
-        xhr.onload = () => {
-            let status = xhr.status;
-            // Header values for the same header name are joined by he XHR implementation.
-            let headers = shared.api.splitHeaders(xhr.getAllResponseHeaders().split("\r\n").slice(0, -1));
-            let payload = [new Uint8Array(xhr.response)];
-            let raw = {
-                status,
-                headers,
-                payload
-            };
-            resolve(raw);
-        };
-        if ((requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onresponseprogess) !== undefined) {
-            xhr.onprogress = (event) => {
+function makeXHRRequestHandler(options) {
+    let retryAfterTimestamp = Date.now();
+    return (raw, clientOptions, requestOptions) => __awaiter(this, void 0, void 0, function* () {
+        yield shared.api.createRequestDelay(retryAfterTimestamp - Date.now());
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            // @ts-ignore
+            let xhr = new XMLHttpRequest();
+            xhr.onerror = reject;
+            xhr.onabort = reject;
+            xhr.onload = () => {
                 var _a;
-                if (event.lengthComputable) {
-                    (_a = requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onresponseprogess) === null || _a === void 0 ? void 0 : _a.call(requestOptions, event.loaded / event.total);
-                }
+                let status = xhr.status;
+                // Header values for the same header name are joined by he XHR implementation.
+                let headers = shared.api.splitHeaders(xhr.getAllResponseHeaders().split("\r\n").slice(0, -1));
+                let payload = [new Uint8Array(xhr.response)];
+                let raw = {
+                    status,
+                    headers,
+                    payload
+                };
+                retryAfterTimestamp = (_a = shared.api.parseRetryAfterTimestamp(headers)) !== null && _a !== void 0 ? _a : Date.now();
+                resolve(raw);
             };
-        }
-        if ((requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onrequestprogress) !== undefined) {
-            xhr.upload.onprogress = (event) => {
-                var _a;
-                if (event.lengthComputable) {
-                    (_a = requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onrequestprogress) === null || _a === void 0 ? void 0 : _a.call(requestOptions, event.loaded / event.total);
-                }
-            };
-        }
-        let url = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
-        url += shared.api.combineComponents(raw.components);
-        url += shared.api.combineParameters(raw.parameters);
-        xhr.open(raw.method, url, true);
-        xhr.responseType = "arraybuffer";
-        for (let header of raw.headers) {
-            // Header values for the same header name are joined by he XHR implementation.
-            xhr.setRequestHeader(header[0], header[1]);
-        }
-        xhr.send(yield shared.api.collectPayload(raw.payload));
-    }));
+            if ((requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onresponseprogess) !== undefined) {
+                xhr.onprogress = (event) => {
+                    var _a;
+                    if (event.lengthComputable) {
+                        (_a = requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onresponseprogess) === null || _a === void 0 ? void 0 : _a.call(requestOptions, event.loaded / event.total);
+                    }
+                };
+            }
+            if ((requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onrequestprogress) !== undefined) {
+                xhr.upload.onprogress = (event) => {
+                    var _a;
+                    if (event.lengthComputable) {
+                        (_a = requestOptions === null || requestOptions === void 0 ? void 0 : requestOptions.onrequestprogress) === null || _a === void 0 ? void 0 : _a.call(requestOptions, event.loaded / event.total);
+                    }
+                };
+            }
+            let url = (_a = clientOptions === null || clientOptions === void 0 ? void 0 : clientOptions.urlPrefix) !== null && _a !== void 0 ? _a : "";
+            url += shared.api.combineComponents(raw.components);
+            url += shared.api.combineParameters(raw.parameters);
+            xhr.open(raw.method, url, true);
+            xhr.responseType = "arraybuffer";
+            for (let header of raw.headers) {
+                // Header values for the same header name are joined by he XHR implementation.
+                xhr.setRequestHeader(header[0], header[1]);
+            }
+            xhr.send(yield shared.api.collectPayload(raw.payload));
+        }));
+    });
 }
-exports.xhr = xhr;
+exports.makeXHRRequestHandler = makeXHRRequestHandler;
 ;
+exports.xhr = makeXHRRequestHandler();
 function finalizeRequest(raw, defaultHeaders) {
     let headersToAppend = defaultHeaders.filter((defaultHeader) => {
         let found = raw.headers.find((header) => header[0].toLowerCase() === defaultHeader[0].toLowerCase());
