@@ -7,6 +7,7 @@ export type MessageMap<A> = stdlib.routing.MessageMap<A>;
 export type MessageGuard<A extends stdlib.routing.Message> = {
 	as(subject: any, path?: string): A;
 	is(subject: any, path?: string): subject is A;
+	to(subject: any, path?: string): A;
 	ts(eol?: string): string;
 };
 
@@ -19,6 +20,8 @@ export abstract class MessageGuardBase<A extends Message> implements MessageGuar
 	constructor() {}
 
 	abstract as(subject: any, path?: string): A;
+
+	abstract to(subject: any, path?: string): A;
 
 	abstract ts(eol?: string): string;
 

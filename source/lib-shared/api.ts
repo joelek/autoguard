@@ -330,6 +330,9 @@ export const AsyncBinary: serialization.MessageGuard<AsyncBinary> = {
 		}
 		return true;
 	},
+	to(subject: any, path: string = ""): AsyncBinary {
+		return this.as(subject, path);
+	},
 	ts(eol: string = "\n"): string {
 		return `AsyncBinary`;
 	}
@@ -354,6 +357,9 @@ export const SyncBinary: serialization.MessageGuard<SyncBinary> = {
 			return false;
 		}
 		return true;
+	},
+	to(subject: any, path: string = ""): SyncBinary {
+		return this.as(subject, path);
 	},
 	ts(eol: string = "\n"): string {
 		return `SyncBinary`;

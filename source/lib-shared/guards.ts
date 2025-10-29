@@ -25,6 +25,10 @@ export class AnyGuard extends serialization.MessageGuardBase<Any> {
 		return subject;
 	}
 
+	to(subject: any, path: string = ""): Any {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		return "any";
 	}
@@ -48,6 +52,17 @@ export class ArrayGuard<A extends serialization.Message> extends serialization.M
 				this.guard.as(subject[i], path + "[" + i + "]");
 			}
 			return subject;
+		}
+		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): Array<A> {
+		if ((subject != null) && (subject.constructor === globalThis.Array)) {
+			let clone = [] as Array<A>;
+			for (let i = 0; i < subject.length; i++) {
+				clone.push(this.guard.to(subject[i], path + "[" + i + "]"));
+			}
+			return clone;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
@@ -77,6 +92,10 @@ export class BigIntGuard extends serialization.MessageGuardBase<BigInt> {
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): BigInt {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		return "bigint";
 	}
@@ -98,6 +117,10 @@ export class BinaryGuard extends serialization.MessageGuardBase<Binary> {
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Binary {
+		return this.as(subject, path).slice();
+	}
+
 	ts(eol: string = "\n"): string {
 		return "binary";
 	}
@@ -117,6 +140,10 @@ export class BooleanGuard extends serialization.MessageGuardBase<Boolean> {
 			return subject as boolean;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): Boolean {
+		return this.as(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -141,6 +168,10 @@ export class BooleanLiteralGuard<A extends boolean> extends serialization.Messag
 			return subject;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): BooleanLiteral<A> {
+		return this.as(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -168,6 +199,10 @@ export class GroupGuard<A extends serialization.Message> extends serialization.M
 
 	as(subject: any, path: string = ""): Group<A> {
 		return this.guard.as(subject, path);
+	}
+
+	to(subject: any, path: string = ""): Group<A> {
+		return this.guard.to(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -207,6 +242,10 @@ export class IntegerGuard extends serialization.MessageGuardBase<Integer> {
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Integer {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		if (this.min == null && this.max == null) {
 			return "integer";
@@ -233,6 +272,10 @@ export class IntegerLiteralGuard<A extends number> extends serialization.Message
 			return subject;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): IntegerLiteral<A> {
+		return this.as(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -263,6 +306,17 @@ export class IntersectionGuard<A extends TupleOf<serialization.MessageMap<any>[]
 		return subject;
 	}
 
+	to(subject: any, path: string = ""): Intersection<A> {
+		let clone: globalThis.Record<string, any> = {};
+		for (let guard of this.guards) {
+			clone = {
+				...clone,
+				...guard.to(subject, path)
+			};
+		}
+		return clone as Intersection<A>;
+	}
+
 	ts(eol: string = "\n"): string {
 		let lines = new globalThis.Array<string>();
 		for (let guard of this.guards) {
@@ -290,6 +344,10 @@ export class NullGuard extends serialization.MessageGuardBase<Null> {
 			return subject;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): Null {
+		return this.as(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -325,6 +383,10 @@ export class NumberGuard extends serialization.MessageGuardBase<Number> {
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Number {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		if (this.min == null && this.max == null) {
 			return "number";
@@ -351,6 +413,10 @@ export class NumberLiteralGuard<A extends number> extends serialization.MessageG
 			return subject;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): NumberLiteral<A> {
+		return this.as(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -387,6 +453,22 @@ export class ObjectGuard<A extends serialization.MessageMap<A>, B extends serial
 				}
 			}
 			return subject;
+		}
+		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): Object<A, B> {
+		if ((subject != null) && (subject.constructor === globalThis.Object)) {
+			let clone: globalThis.Record<string, any> = {};
+			for (let key in this.required) {
+				clone[key] = this.required[key].to(subject[key], path + (/^([a-z][a-z0-9_]*)$/isu.test(key) ? "." + key : "[\"" + key + "\"]"));
+			}
+			for (let key in this.optional) {
+				if (key in subject && subject[key] !== undefined) {
+					clone[key] = this.optional[key].to(subject[key], path + (/^([a-z][a-z0-9_]*)$/isu.test(key) ? "." + key : "[\"" + key + "\"]"));
+				}
+			}
+			return clone as Object<A, B>;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
@@ -430,6 +512,18 @@ export class RecordGuard<A extends serialization.Message> extends serialization.
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Record<A> {
+		if ((subject != null) && (subject.constructor === globalThis.Object)) {
+			let clone: globalThis.Record<string, any> = {};
+			let wrapped = Union.of(Undefined, this.guard);
+			for (let key of globalThis.Object.keys(subject)) {
+				clone[key] = wrapped.to(subject[key], path + "[\"" + key + "\"]");
+			}
+			return clone as Record<A>;
+		}
+		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		return `record<${this.guard.ts(eol)}>`;
 	}
@@ -461,6 +555,10 @@ export class KeyGuard<A extends serialization.MessageMap<A>> extends serializati
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Key<A> {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		let lines = new globalThis.Array<string>();
 		for (let key of globalThis.Object.keys(this.record)) {
@@ -488,6 +586,10 @@ export class ReferenceGuard<A extends serialization.Message> extends serializati
 
 	as(subject: any, path: string = ""): Reference<A> {
 		return this.guard().as(subject, path);
+	}
+
+	to(subject: any, path: string = ""): Reference<A> {
+		return this.guard().to(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -522,6 +624,10 @@ export class StringGuard extends serialization.MessageGuardBase<String> {
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): String {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		if (this.pattern == null) {
 			return "string";
@@ -549,6 +655,10 @@ export class StringLiteralGuard<A extends string> extends serialization.MessageG
 			return subject;
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): StringLiteral<A> {
+		return this.as(subject, path);
 	}
 
 	ts(eol: string = "\n"): string {
@@ -582,6 +692,17 @@ export class TupleGuard<A extends TupleOf<serialization.Message>> extends serial
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Tuple<A> {
+		if ((subject != null) && (subject.constructor === globalThis.Array)) {
+			let clone = [] as Array<any>;
+			for (let i = 0; i < this.guards.length; i++) {
+				clone[i] = this.guards[i].to(subject[i], path + "[" + i + "]");
+			}
+			return clone as Tuple<A>;
+		}
+		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		let lines = new globalThis.Array<string>();
 		for (let guard of this.guards) {
@@ -611,6 +732,10 @@ export class UndefinedGuard extends serialization.MessageGuardBase<Undefined> {
 		throw new serialization.MessageGuardError(this, subject, path);
 	}
 
+	to(subject: any, path: string = ""): Undefined {
+		return this.as(subject, path);
+	}
+
 	ts(eol: string = "\n"): string {
 		return "undefined";
 	}
@@ -632,6 +757,15 @@ export class UnionGuard<A extends TupleOf<serialization.Message>> extends serial
 		for (let guard of this.guards) {
 			try {
 				return guard.as(subject, path);
+			} catch (error) {}
+		}
+		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): Union<A> {
+		for (let guard of this.guards) {
+			try {
+				return guard.to(subject, path);
 			} catch (error) {}
 		}
 		throw new serialization.MessageGuardError(this, subject, path);
