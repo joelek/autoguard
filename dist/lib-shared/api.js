@@ -381,6 +381,9 @@ exports.AsyncBinary = {
         }
         return true;
     },
+    to(subject, path = "") {
+        return this.as(subject, path);
+    },
     ts(eol = "\n") {
         return `AsyncBinary`;
     }
@@ -403,6 +406,9 @@ exports.SyncBinary = {
             return false;
         }
         return true;
+    },
+    to(subject, path = "") {
+        return this.as(subject, path);
     },
     ts(eol = "\n") {
         return `SyncBinary`;

@@ -21,6 +21,7 @@ export type Any = any;
 export declare class AnyGuard extends serialization.MessageGuardBase<Any> {
     constructor();
     as(subject: any, path?: string): Any;
+    to(subject: any, path?: string): Any;
     ts(eol?: string): string;
 }
 export declare const Any: AnyGuard;
@@ -29,6 +30,7 @@ export declare class ArrayGuard<A extends serialization.Message> extends seriali
     readonly guard: serialization.MessageGuard<A>;
     constructor(guard: serialization.MessageGuard<A>);
     as(subject: any, path?: string): Array<A>;
+    to(subject: any, path?: string): Array<A>;
     ts(eol?: string): string;
 }
 export declare const Array: {
@@ -38,6 +40,7 @@ export type BigInt = bigint;
 export declare class BigIntGuard extends serialization.MessageGuardBase<BigInt> {
     constructor();
     as(subject: any, path?: string): BigInt;
+    to(subject: any, path?: string): BigInt;
     ts(eol?: string): string;
 }
 export declare const BigInt: BigIntGuard;
@@ -45,6 +48,7 @@ export type Binary = Uint8Array;
 export declare class BinaryGuard extends serialization.MessageGuardBase<Binary> {
     constructor();
     as(subject: any, path?: string): Binary;
+    to(subject: any, path?: string): Binary;
     ts(eol?: string): string;
 }
 export declare const Binary: BinaryGuard;
@@ -52,6 +56,7 @@ export type Boolean = boolean;
 export declare class BooleanGuard extends serialization.MessageGuardBase<Boolean> {
     constructor();
     as(subject: any, path?: string): Boolean;
+    to(subject: any, path?: string): Boolean;
     ts(eol?: string): string;
 }
 export declare const Boolean: BooleanGuard;
@@ -60,6 +65,7 @@ export declare class BooleanLiteralGuard<A extends boolean> extends serializatio
     readonly value: A;
     constructor(value: A);
     as(subject: any, path?: string): BooleanLiteral<A>;
+    to(subject: any, path?: string): BooleanLiteral<A>;
     ts(eol?: string): string;
 }
 export declare const BooleanLiteral: {
@@ -71,6 +77,7 @@ export declare class GroupGuard<A extends serialization.Message> extends seriali
     readonly name?: string;
     constructor(guard: serialization.MessageGuard<A>, name?: string);
     as(subject: any, path?: string): Group<A>;
+    to(subject: any, path?: string): Group<A>;
     ts(eol?: string): string;
 }
 export declare const Group: {
@@ -82,6 +89,7 @@ export declare class IntegerGuard extends serialization.MessageGuardBase<Integer
     readonly max?: number;
     constructor(min?: number, max?: number);
     as(subject: any, path?: string): Integer;
+    to(subject: any, path?: string): Integer;
     ts(eol?: string): string;
 }
 export declare const Integer: IntegerGuard;
@@ -90,6 +98,7 @@ export declare class IntegerLiteralGuard<A extends number> extends serialization
     readonly value: A;
     constructor(value: A);
     as(subject: any, path?: string): IntegerLiteral<A>;
+    to(subject: any, path?: string): IntegerLiteral<A>;
     ts(eol?: string): string;
 }
 export declare const IntegerLiteral: {
@@ -100,6 +109,7 @@ export declare class IntersectionGuard<A extends TupleOf<serialization.MessageMa
     readonly guards: TupleOf<serialization.MessageGuardTuple<A>>;
     constructor(...guards: TupleOf<serialization.MessageGuardTuple<A>>);
     as(subject: any, path?: string): Intersection<A>;
+    to(subject: any, path?: string): Intersection<A>;
     ts(eol?: string): string;
 }
 export declare const Intersection: {
@@ -109,6 +119,7 @@ export type Null = null;
 export declare class NullGuard extends serialization.MessageGuardBase<Null> {
     constructor();
     as(subject: any, path?: string): Null;
+    to(subject: any, path?: string): Null;
     ts(eol?: string): string;
 }
 export declare const Null: NullGuard;
@@ -118,6 +129,7 @@ export declare class NumberGuard extends serialization.MessageGuardBase<Number> 
     readonly max?: number;
     constructor(min?: number, max?: number);
     as(subject: any, path?: string): Number;
+    to(subject: any, path?: string): Number;
     ts(eol?: string): string;
 }
 export declare const Number: NumberGuard;
@@ -126,6 +138,7 @@ export declare class NumberLiteralGuard<A extends number> extends serialization.
     readonly value: A;
     constructor(value: A);
     as(subject: any, path?: string): NumberLiteral<A>;
+    to(subject: any, path?: string): NumberLiteral<A>;
     ts(eol?: string): string;
 }
 export declare const NumberLiteral: {
@@ -137,6 +150,7 @@ export declare class ObjectGuard<A extends serialization.MessageMap<A>, B extend
     readonly optional: serialization.MessageGuardMap<B>;
     constructor(required: serialization.MessageGuardMap<A>, optional: serialization.MessageGuardMap<B>);
     as(subject: any, path?: string): Object<A, B>;
+    to(subject: any, path?: string): Object<A, B>;
     ts(eol?: string): string;
 }
 export declare const Object: {
@@ -147,6 +161,7 @@ export declare class RecordGuard<A extends serialization.Message> extends serial
     readonly guard: serialization.MessageGuard<A>;
     constructor(guard: serialization.MessageGuard<A>);
     as(subject: any, path?: string): Record<A>;
+    to(subject: any, path?: string): Record<A>;
     ts(eol?: string): string;
 }
 export declare const Record: {
@@ -157,6 +172,7 @@ export declare class KeyGuard<A extends serialization.MessageMap<A>> extends ser
     readonly record: A;
     constructor(record: A);
     as(subject: any, path?: string): Key<A>;
+    to(subject: any, path?: string): Key<A>;
     ts(eol?: string): string;
 }
 export declare const Key: {
@@ -167,6 +183,7 @@ export declare class ReferenceGuard<A extends serialization.Message> extends ser
     readonly guard: () => serialization.MessageGuard<A>;
     constructor(guard: () => serialization.MessageGuard<A>);
     as(subject: any, path?: string): Reference<A>;
+    to(subject: any, path?: string): Reference<A>;
     ts(eol?: string): string;
 }
 export declare const Reference: {
@@ -177,6 +194,7 @@ export declare class StringGuard extends serialization.MessageGuardBase<String> 
     readonly pattern?: RegExp;
     constructor(pattern?: RegExp);
     as(subject: any, path?: string): String;
+    to(subject: any, path?: string): String;
     ts(eol?: string): string;
 }
 export declare const String: StringGuard;
@@ -185,6 +203,7 @@ export declare class StringLiteralGuard<A extends string> extends serialization.
     readonly value: A;
     constructor(value: A);
     as(subject: any, path?: string): StringLiteral<A>;
+    to(subject: any, path?: string): StringLiteral<A>;
     ts(eol?: string): string;
 }
 export declare const StringLiteral: {
@@ -195,6 +214,7 @@ export declare class TupleGuard<A extends TupleOf<serialization.Message>> extend
     readonly guards: TupleOf<serialization.MessageGuardTuple<A>>;
     constructor(...guards: TupleOf<serialization.MessageGuardTuple<A>>);
     as(subject: any, path?: string): Tuple<A>;
+    to(subject: any, path?: string): Tuple<A>;
     ts(eol?: string): string;
 }
 export declare const Tuple: {
@@ -204,6 +224,7 @@ export type Undefined = undefined;
 export declare class UndefinedGuard extends serialization.MessageGuardBase<Undefined> {
     constructor();
     as(subject: any, path?: string): Undefined;
+    to(subject: any, path?: string): Undefined;
     ts(eol?: string): string;
 }
 export declare const Undefined: UndefinedGuard;
@@ -212,6 +233,7 @@ export declare class UnionGuard<A extends TupleOf<serialization.Message>> extend
     readonly guards: TupleOf<serialization.MessageGuardTuple<A>>;
     constructor(...guards: TupleOf<serialization.MessageGuardTuple<A>>);
     as(subject: any, path?: string): Union<A>;
+    to(subject: any, path?: string): Union<A>;
     ts(eol?: string): string;
 }
 export declare const Union: {

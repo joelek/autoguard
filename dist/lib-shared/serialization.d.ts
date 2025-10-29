@@ -4,6 +4,7 @@ export type MessageMap<A> = stdlib.routing.MessageMap<A>;
 export type MessageGuard<A extends stdlib.routing.Message> = {
     as(subject: any, path?: string): A;
     is(subject: any, path?: string): subject is A;
+    to(subject: any, path?: string): A;
     ts(eol?: string): string;
 };
 export interface MessageCodec {
@@ -13,6 +14,7 @@ export interface MessageCodec {
 export declare abstract class MessageGuardBase<A extends Message> implements MessageGuard<A> {
     constructor();
     abstract as(subject: any, path?: string): A;
+    abstract to(subject: any, path?: string): A;
     abstract ts(eol?: string): string;
     is(subject: any, path?: string): subject is A;
     decode(codec: MessageCodec, buffer: Uint8Array): A;

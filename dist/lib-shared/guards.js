@@ -9,6 +9,9 @@ class AnyGuard extends serialization.MessageGuardBase {
     as(subject, path = "") {
         return subject;
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         return "any";
     }
@@ -27,6 +30,16 @@ class ArrayGuard extends serialization.MessageGuardBase {
                 this.guard.as(subject[i], path + "[" + i + "]");
             }
             return subject;
+        }
+        throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        if ((subject != null) && (subject.constructor === globalThis.Array)) {
+            let clone = [];
+            for (let i = 0; i < subject.length; i++) {
+                clone.push(this.guard.to(subject[i], path + "[" + i + "]"));
+            }
+            return clone;
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
@@ -51,6 +64,9 @@ class BigIntGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         return "bigint";
     }
@@ -67,6 +83,9 @@ class BinaryGuard extends serialization.MessageGuardBase {
             return subject;
         }
         throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        return this.as(subject, path).slice();
     }
     ts(eol = "\n") {
         return "binary";
@@ -85,6 +104,9 @@ class BooleanGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         return "boolean";
     }
@@ -102,6 +124,9 @@ class BooleanLiteralGuard extends serialization.MessageGuardBase {
             return subject;
         }
         throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        return this.as(subject, path);
     }
     ts(eol = "\n") {
         return `${this.value}`;
@@ -122,6 +147,9 @@ class GroupGuard extends serialization.MessageGuardBase {
     }
     as(subject, path = "") {
         return this.guard.as(subject, path);
+    }
+    to(subject, path = "") {
+        return this.guard.to(subject, path);
     }
     ts(eol = "\n") {
         var _a;
@@ -154,6 +182,9 @@ class IntegerGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         var _a, _b;
         if (this.min == null && this.max == null) {
@@ -178,6 +209,9 @@ class IntegerLiteralGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         return `${this.value}`;
     }
@@ -199,6 +233,13 @@ class IntersectionGuard extends serialization.MessageGuardBase {
             guard.as(subject, path);
         }
         return subject;
+    }
+    to(subject, path = "") {
+        let clone = {};
+        for (let guard of this.guards) {
+            clone = Object.assign(Object.assign({}, clone), guard.to(subject, path));
+        }
+        return clone;
     }
     ts(eol = "\n") {
         let lines = new globalThis.Array();
@@ -224,6 +265,9 @@ class NullGuard extends serialization.MessageGuardBase {
             return subject;
         }
         throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        return this.as(subject, path);
     }
     ts(eol = "\n") {
         return "null";
@@ -251,6 +295,9 @@ class NumberGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         var _a, _b;
         if (this.min == null && this.max == null) {
@@ -274,6 +321,9 @@ class NumberLiteralGuard extends serialization.MessageGuardBase {
             return subject;
         }
         throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        return this.as(subject, path);
     }
     ts(eol = "\n") {
         return `${this.value}`;
@@ -303,6 +353,21 @@ class ObjectGuard extends serialization.MessageGuardBase {
                 }
             }
             return subject;
+        }
+        throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        if ((subject != null) && (subject.constructor === globalThis.Object)) {
+            let clone = {};
+            for (let key in this.required) {
+                clone[key] = this.required[key].to(subject[key], path + (/^([a-z][a-z0-9_]*)$/isu.test(key) ? "." + key : "[\"" + key + "\"]"));
+            }
+            for (let key in this.optional) {
+                if (key in subject && subject[key] !== undefined) {
+                    clone[key] = this.optional[key].to(subject[key], path + (/^([a-z][a-z0-9_]*)$/isu.test(key) ? "." + key : "[\"" + key + "\"]"));
+                }
+            }
+            return clone;
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
@@ -339,6 +404,17 @@ class RecordGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        if ((subject != null) && (subject.constructor === globalThis.Object)) {
+            let clone = {};
+            let wrapped = exports.Union.of(exports.Undefined, this.guard);
+            for (let key of globalThis.Object.keys(subject)) {
+                clone[key] = wrapped.to(subject[key], path + "[\"" + key + "\"]");
+            }
+            return clone;
+        }
+        throw new serialization.MessageGuardError(this, subject, path);
+    }
     ts(eol = "\n") {
         return `record<${this.guard.ts(eol)}>`;
     }
@@ -364,6 +440,9 @@ class KeyGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         let lines = new globalThis.Array();
         for (let key of globalThis.Object.keys(this.record)) {
@@ -386,6 +465,9 @@ class ReferenceGuard extends serialization.MessageGuardBase {
     }
     as(subject, path = "") {
         return this.guard().as(subject, path);
+    }
+    to(subject, path = "") {
+        return this.guard().to(subject, path);
     }
     ts(eol = "\n") {
         return this.guard().ts(eol);
@@ -413,6 +495,9 @@ class StringGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         if (this.pattern == null) {
             return "string";
@@ -437,6 +522,9 @@ class StringLiteralGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         return `"${this.value}"`;
     }
@@ -459,6 +547,16 @@ class TupleGuard extends serialization.MessageGuardBase {
                 this.guards[i].as(subject[i], path + "[" + i + "]");
             }
             return subject;
+        }
+        throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        if ((subject != null) && (subject.constructor === globalThis.Array)) {
+            let clone = [];
+            for (let i = 0; i < this.guards.length; i++) {
+                clone[i] = this.guards[i].to(subject[i], path + "[" + i + "]");
+            }
+            return clone;
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
@@ -487,6 +585,9 @@ class UndefinedGuard extends serialization.MessageGuardBase {
         }
         throw new serialization.MessageGuardError(this, subject, path);
     }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
     ts(eol = "\n") {
         return "undefined";
     }
@@ -503,6 +604,15 @@ class UnionGuard extends serialization.MessageGuardBase {
         for (let guard of this.guards) {
             try {
                 return guard.as(subject, path);
+            }
+            catch (error) { }
+        }
+        throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        for (let guard of this.guards) {
+            try {
+                return guard.to(subject, path);
             }
             catch (error) { }
         }
