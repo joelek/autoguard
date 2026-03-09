@@ -26,13 +26,17 @@ export const MyBooleanliteralType: autoguard.serialization.MessageGuard<MyBoolea
 
 export type MyBooleanliteralType = autoguard.guards.BooleanLiteral<true>;
 
+export const MyDateType: autoguard.serialization.MessageGuard<MyDateType> = autoguard.guards.Date;
+
+export type MyDateType = autoguard.guards.Date;
+
 export const MyGroupType: autoguard.serialization.MessageGuard<MyGroupType> = autoguard.guards.Group.of(autoguard.guards.Any);
 
 export type MyGroupType = autoguard.guards.Group<autoguard.guards.Any>;
 
-export const MyIntegerType: autoguard.serialization.MessageGuard<MyIntegerType> = autoguard.guards.Number;
+export const MyIntegerType: autoguard.serialization.MessageGuard<MyIntegerType> = autoguard.guards.Integer;
 
-export type MyIntegerType = autoguard.guards.Number;
+export type MyIntegerType = autoguard.guards.Integer;
 
 export const MyIntegerLiteralType: autoguard.serialization.MessageGuard<MyIntegerLiteralType> = autoguard.guards.IntegerLiteral.of(1337);
 
@@ -170,6 +174,7 @@ export namespace Autoguard {
 		"MyBinaryType": autoguard.guards.Reference.of(() => MyBinaryType),
 		"MyBooleanType": autoguard.guards.Reference.of(() => MyBooleanType),
 		"MyBooleanliteralType": autoguard.guards.Reference.of(() => MyBooleanliteralType),
+		"MyDateType": autoguard.guards.Reference.of(() => MyDateType),
 		"MyGroupType": autoguard.guards.Reference.of(() => MyGroupType),
 		"MyIntegerType": autoguard.guards.Reference.of(() => MyIntegerType),
 		"MyIntegerLiteralType": autoguard.guards.Reference.of(() => MyIntegerLiteralType),
