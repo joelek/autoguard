@@ -185,6 +185,31 @@ export const BooleanLiteral = {
 	}
 };
 
+export type Date = globalThis.Date;
+
+export class DateGuard extends serialization.MessageGuardBase<Date> {
+	constructor() {
+		super();
+	}
+
+	as(subject: any, path: string = ""): Date {
+		if ((subject != null) && (subject.constructor === globalThis.Date)) {
+			return subject as Date;
+		}
+		throw new serialization.MessageGuardError(this, subject, path);
+	}
+
+	to(subject: any, path: string = ""): Date {
+		return this.as(subject, path);
+	}
+
+	ts(eol: string = "\n"): string {
+		return "date";
+	}
+};
+
+export const Date = new DateGuard();
+
 export type Group<A extends serialization.Message> = A;
 
 export class GroupGuard<A extends serialization.Message> extends serialization.MessageGuardBase<Group<A>> {

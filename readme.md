@@ -174,6 +174,8 @@ guard MyBooleanType: boolean;
 
 guard MyBooleanliteralType: true;
 
+guard MyDateType: date;
+
 guard MyGroupType: (any); # Used when different precedence is required.
 
 guard MyImportedType: ./module/MyExternalType;
@@ -433,6 +435,7 @@ AnyType = "any"
 ArrayType = Type "[" "]"
 BooleanType = "boolean"
 BooleanLiteralType = "true" or "false"
+DateType = "date"
 GroupType = "(" Type ")"
 IntegerTypeParameters = "(" (IntegerLiteralType or "*") "," (IntegerLiteralType or "*") ")"
 IntegerType = "integer" IntegerTypeParameters?
@@ -463,7 +466,7 @@ UndefinedType = "undefined"
 UnionType = Type "|" Type
 BigIntType = "bigint"
 BinaryType = "binary"
-PrimitiveType = BigIntType or BinaryType or BooleanType or IntegerType or NumberType or StringType
+PrimitiveType = BigIntType or BinaryType or BooleanType or DateType or IntegerType or NumberType or StringType
 SupportType = AnyType or NullType or UndefinedType;
 LiteralType = BooleanLiteralType or NumberLiteralType or StringLiteralType
 ComplexType = ArrayType or GroupType or IntersectionType or ObjectType or RecordType or ReferenceType or TupleType or UnionType

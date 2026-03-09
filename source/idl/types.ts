@@ -34,7 +34,8 @@ export const Type = {
 				GroupType.parse,
 				RecordType.parse,
 				BigIntType.parse,
-				BinaryType.parse
+				BinaryType.parse,
+				DateType.parse
 			];
 			let errors = new Array<any>();
 			for (let parser of parsers) {
@@ -265,6 +266,39 @@ export class BooleanLiteralType implements Type {
 			} else {
 				return BooleanLiteralType.INSTANCE_FALSE;
 			}
+		});
+	}
+};
+
+export class DateType implements Type {
+	constructor() {
+
+	}
+
+	generateSchema(options: shared.Options): string {
+		return "date";
+	}
+
+	generateType(options: shared.Options): string {
+		return "autoguard.guards.Date";
+	}
+
+	generateTypeGuard(options: shared.Options): string {
+		let lines = new Array<string>();
+		lines.push("autoguard.guards.Date");
+		return lines.join(options.eol);
+	}
+
+	getReferences(): Array<shared.Reference> {
+		return [];
+	}
+
+	static readonly INSTANCE = new DateType();
+
+	static parse(tokenizer: tokenization.Tokenizer, parsers: Array<TypeParser>): DateType {
+		return tokenizer.newContext((read, peek) => {
+			tokenization.expect(read(), "date");
+			return DateType.INSTANCE;
 		});
 	}
 };

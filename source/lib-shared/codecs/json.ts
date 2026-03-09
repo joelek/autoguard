@@ -12,6 +12,11 @@ const BINARY_GUARD = guards.Object.of({
 	data: guards.String
 });
 
+const DATE_GUARD = guards.Object.of({
+	type: guards.StringLiteral.of("@date"),
+	data: guards.String
+});
+
 export class JSONCodec implements serialization.MessageCodec {
 	constructor() {}
 
@@ -23,6 +28,9 @@ export class JSONCodec implements serialization.MessageCodec {
 			}
 			if (BINARY_GUARD.is(subject)) {
 				return bedrock.utils.Chunk.fromString(subject.data, "base64url");
+			}
+			if (DATE_GUARD.is(subject)) {
+				return new Date(subject.data);
 			}
 			return subject;
 		});
@@ -41,6 +49,12 @@ export class JSONCodec implements serialization.MessageCodec {
 				return {
 					type: "@binary",
 					data: bedrock.utils.Chunk.toString(subject, "base64url")
+				};
+			}
+			if (guards.Date.is(subject)) {
+				return {
+					type: "@date",
+					data: subject.toISOString()
 				};
 			}
 			return subject;
