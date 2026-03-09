@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Union = exports.UnionGuard = exports.Undefined = exports.UndefinedGuard = exports.Tuple = exports.TupleGuard = exports.StringLiteral = exports.StringLiteralGuard = exports.String = exports.StringGuard = exports.Reference = exports.ReferenceGuard = exports.Key = exports.KeyGuard = exports.Record = exports.RecordGuard = exports.Object = exports.ObjectGuard = exports.NumberLiteral = exports.NumberLiteralGuard = exports.Number = exports.NumberGuard = exports.Null = exports.NullGuard = exports.Intersection = exports.IntersectionGuard = exports.IntegerLiteral = exports.IntegerLiteralGuard = exports.Integer = exports.IntegerGuard = exports.Group = exports.GroupGuard = exports.BooleanLiteral = exports.BooleanLiteralGuard = exports.Boolean = exports.BooleanGuard = exports.Binary = exports.BinaryGuard = exports.BigInt = exports.BigIntGuard = exports.Array = exports.ArrayGuard = exports.Any = exports.AnyGuard = void 0;
+exports.Union = exports.UnionGuard = exports.Undefined = exports.UndefinedGuard = exports.Tuple = exports.TupleGuard = exports.StringLiteral = exports.StringLiteralGuard = exports.String = exports.StringGuard = exports.Reference = exports.ReferenceGuard = exports.Key = exports.KeyGuard = exports.Record = exports.RecordGuard = exports.Object = exports.ObjectGuard = exports.NumberLiteral = exports.NumberLiteralGuard = exports.Number = exports.NumberGuard = exports.Null = exports.NullGuard = exports.Intersection = exports.IntersectionGuard = exports.IntegerLiteral = exports.IntegerLiteralGuard = exports.Integer = exports.IntegerGuard = exports.Group = exports.GroupGuard = exports.Date = exports.DateGuard = exports.BooleanLiteral = exports.BooleanLiteralGuard = exports.Boolean = exports.BooleanGuard = exports.Binary = exports.BinaryGuard = exports.BigInt = exports.BigIntGuard = exports.Array = exports.ArrayGuard = exports.Any = exports.AnyGuard = void 0;
 const serialization = require("./serialization");
 class AnyGuard extends serialization.MessageGuardBase {
     constructor() {
@@ -139,6 +139,26 @@ exports.BooleanLiteral = {
         return new BooleanLiteralGuard(value);
     }
 };
+class DateGuard extends serialization.MessageGuardBase {
+    constructor() {
+        super();
+    }
+    as(subject, path = "") {
+        if ((subject != null) && (subject.constructor === globalThis.Date)) {
+            return subject;
+        }
+        throw new serialization.MessageGuardError(this, subject, path);
+    }
+    to(subject, path = "") {
+        return this.as(subject, path);
+    }
+    ts(eol = "\n") {
+        return "date";
+    }
+}
+exports.DateGuard = DateGuard;
+;
+exports.Date = new DateGuard();
 class GroupGuard extends serialization.MessageGuardBase {
     constructor(guard, name) {
         super();

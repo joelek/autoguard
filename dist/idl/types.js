@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PlainType = exports.Options = exports.Headers = exports.UnionType = exports.UndefinedType = exports.TupleType = exports.StringLiteralType = exports.StringType = exports.ReferenceType = exports.RecordType = exports.ObjectType = exports.NumberLiteralType = exports.NumberType = exports.NullType = exports.IntersectionType = exports.IntegerLiteralType = exports.IntegerType = exports.GroupType = exports.BooleanLiteralType = exports.BooleanType = exports.BinaryType = exports.BigIntType = exports.ArrayType = exports.AnyType = exports.Type = void 0;
+exports.PlainType = exports.Options = exports.Headers = exports.UnionType = exports.UndefinedType = exports.TupleType = exports.StringLiteralType = exports.StringType = exports.ReferenceType = exports.RecordType = exports.ObjectType = exports.NumberLiteralType = exports.NumberType = exports.NullType = exports.IntersectionType = exports.IntegerLiteralType = exports.IntegerType = exports.GroupType = exports.DateType = exports.BooleanLiteralType = exports.BooleanType = exports.BinaryType = exports.BigIntType = exports.ArrayType = exports.AnyType = exports.Type = void 0;
 const tokenization = require("./tokenization");
 ;
 exports.Type = {
@@ -28,7 +28,8 @@ exports.Type = {
                 GroupType.parse,
                 RecordType.parse,
                 BigIntType.parse,
-                BinaryType.parse
+                BinaryType.parse,
+                DateType.parse
             ];
             let errors = new Array();
             for (let parser of parsers) {
@@ -227,6 +228,33 @@ class BooleanLiteralType {
 exports.BooleanLiteralType = BooleanLiteralType;
 BooleanLiteralType.INSTANCE_TRUE = new BooleanLiteralType(true);
 BooleanLiteralType.INSTANCE_FALSE = new BooleanLiteralType(false);
+;
+class DateType {
+    constructor() {
+    }
+    generateSchema(options) {
+        return "date";
+    }
+    generateType(options) {
+        return "autoguard.guards.Date";
+    }
+    generateTypeGuard(options) {
+        let lines = new Array();
+        lines.push("autoguard.guards.Date");
+        return lines.join(options.eol);
+    }
+    getReferences() {
+        return [];
+    }
+    static parse(tokenizer, parsers) {
+        return tokenizer.newContext((read, peek) => {
+            tokenization.expect(read(), "date");
+            return DateType.INSTANCE;
+        });
+    }
+}
+exports.DateType = DateType;
+DateType.INSTANCE = new DateType();
 ;
 class GroupType {
     constructor(type) {

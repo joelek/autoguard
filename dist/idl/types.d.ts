@@ -68,6 +68,15 @@ export declare class BooleanLiteralType implements Type {
     static readonly INSTANCE_FALSE: BooleanLiteralType;
     static parse(tokenizer: tokenization.Tokenizer, parsers: Array<TypeParser>): BooleanLiteralType;
 }
+export declare class DateType implements Type {
+    constructor();
+    generateSchema(options: shared.Options): string;
+    generateType(options: shared.Options): string;
+    generateTypeGuard(options: shared.Options): string;
+    getReferences(): Array<shared.Reference>;
+    static readonly INSTANCE: DateType;
+    static parse(tokenizer: tokenization.Tokenizer, parsers: Array<TypeParser>): DateType;
+}
 export declare class GroupType implements Type {
     type: Type;
     constructor(type: Type);

@@ -71,6 +71,14 @@ export declare class BooleanLiteralGuard<A extends boolean> extends serializatio
 export declare const BooleanLiteral: {
     of<A extends boolean>(value: A): BooleanLiteralGuard<A>;
 };
+export type Date = globalThis.Date;
+export declare class DateGuard extends serialization.MessageGuardBase<Date> {
+    constructor();
+    as(subject: any, path?: string): Date;
+    to(subject: any, path?: string): Date;
+    ts(eol?: string): string;
+}
+export declare const Date: DateGuard;
 export type Group<A extends serialization.Message> = A;
 export declare class GroupGuard<A extends serialization.Message> extends serialization.MessageGuardBase<Group<A>> {
     readonly guard: serialization.MessageGuard<A>;
