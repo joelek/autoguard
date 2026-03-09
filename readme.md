@@ -407,6 +407,7 @@ NB: This project targets TypeScript 4 in strict mode.
 * Add support for negative integer and number literals.
 * Fix issue with `serverOptions` being unused in `respond()`.
 * Fix issue with default headers not being applied for unsuccessful server responses.
+* Fix issue with non-standard types not being properly deserialized by bedrock codec.
 
 ## Syntax
 
